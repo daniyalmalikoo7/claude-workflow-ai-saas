@@ -1,0 +1,6 @@
+# This directory is populated by the /architect command.
+# It will contain:
+# - 001-domain-exploration.md (from /explore)
+# - 002-system-architecture.md (from /architect)
+# - 003-implementation-plan.md (from /plan)
+# - security-audit.md (from /security)
