@@ -1,0 +1,50 @@
+{
+  "name": "claude-workflow-ai-saas",
+  "version": "2.2.0",
+  "description": "Production workflow for building AI-native SaaS products. 15 commands, 5 agents, 5 skills. Includes GenAI product layer: prompt versioning, hallucination guards, fallback chains, eval pipelines, cost tracking.",
+  "author": "daniyalmalikoo7",
+  "license": "MIT",
+  "repository": "https://github.com/daniyalmalikoo7/claude-workflow-ai-saas",
+  "keywords": [
+    "ai-saas",
+    "production",
+    "workflow",
+    "agents",
+    "prompt-engineering",
+    "hallucination-guards",
+    "cost-tracking"
+  ],
+  "commands": [
+    "explore",
+    "architect",
+    "plan",
+    "implement",
+    "design-ui",
+    "test",
+    "review",
+    "security",
+    "prompt-engineer",
+    "debug",
+    "commit",
+    "ship",
+    "monitor",
+    "validate",
+    "qa",
+    "context-check",
+    "memory"
+  ],
+  "agents": [
+    "librarian",
+    "reviewer",
+    "qa",
+    "devops",
+    "performance"
+  ],
+  "skills": [
+    "ai-integration",
+    "database",
+    "logging-monitoring",
+    "error-handling",
+    "context-management"
+  ]
+}

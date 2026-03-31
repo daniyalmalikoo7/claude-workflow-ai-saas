@@ -146,23 +146,32 @@ Session 4: /design-ui [AI interaction UX — streaming, confidence
 
 ---
 
-## Phase 7: Pre-Launch (1-2 hours)
+## Phase 7: Pre-Launch (2-3 hours)
 
 **Run in sequence**:
 
 ```
-1. /review — Full codebase review (static analysis)
-2. /security — Security audit (static + config analysis)
-3. /test — Full test suite with coverage report
-4. /monitor — Set up observability (structured logger, Sentry, PostHog, AI metrics, alerts)
-5. /validate — CRITICAL: Actually run the app and verify every feature works.
-              This catches what all the above miss: hardcoded data, dead buttons,
-              broken auth, unresolved env vars, IDOR bugs, mocked onboarding.
-              Fix everything /validate finds before proceeding.
-6. /ship — Pre-deployment checklist (only after /validate passes)
+1. /review          — Full codebase review (static analysis)
+2. /security        — Security audit (static + config analysis)
+3. /test            — Full test suite with coverage report
+4. /monitor         — Set up observability (logging, metrics, alerts)
+5. /validate        — Runtime infrastructure verification: env vars, DB, page wiring,
+                      tenant isolation, AI pipeline. Fix everything before proceeding.
+6. /qa              — End-to-end user flow testing: sign-up → onboarding → core features
+                      → edge cases → mobile responsive. Fix broken flows.
+7. /context-check   — Verify CLAUDE.md accuracy, architecture doc currency, context
+                      efficiency. Ensure the workflow brain matches reality.
+8. /ship            — Final deployment gate (only after all above pass)
 ```
 
-**Why this order matters:** /review and /security check the code. /validate checks the product. /ship checks deployment readiness. If you skip /validate, you will ship an app that compiles but doesn't work.
+**Why this order matters:**
+- /review and /security check the **code** (static analysis)
+- /validate checks the **infrastructure** (runtime, but not user-facing)
+- /qa checks the **product** (from the user's perspective)
+- /context-check checks the **workflow itself** (is Claude working with accurate context?)
+- /ship checks **deployment readiness** (the final gate)
+
+If you skip /validate, you ship code that compiles but doesn't connect. If you skip /qa, you ship infrastructure that works but users can't use. If you skip /context-check, future sessions work with stale context.
 
 Fix any blockers found. Re-run `/ship` until green.
 

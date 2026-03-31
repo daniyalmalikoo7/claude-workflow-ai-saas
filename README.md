@@ -1,223 +1,232 @@
-# 🏗️ Production Claude Code Setup
+# Claude Code Workflow — AI-Native SaaS
 
-### Build and ship production-grade applications with a complete AI engineering team.
+> **The only Claude Code workflow built specifically for shipping AI-powered SaaS products.**
+> Battle-tested by building a production app. Every bug found became a better command.
 
-This is a drop-in Claude Code configuration that gives you a team of specialized agents, battle-tested workflows, and production-grade guardrails — the kind of setup used to build products at companies like Stripe, Linear, and Vercel.
+gstack gives you roles. superpowers gives you methodology. **This gives you both — plus the GenAI product layer that neither has.**
 
-**What you get**: 15 slash commands, 5 specialized agents, 5 reusable skills, 3 security hooks, CI/CD pipeline, cost tracking, prompt versioning, hallucination guards, and a complete build-to-ship orchestration workflow.
+---
 
-**Time to set up**: ~15 minutes.
-**Time to ship an MVP**: Hours to days, not weeks.
+## Why This Exists
+
+Every Claude Code setup teaches Claude how to write code. None of them teach Claude how to build **AI products** — the kind where AI isn't just a developer tool, it's the core feature your customers pay for.
+
+If you're building a product with AI generation, RAG pipelines, vector search, prompt engineering, or LLM API calls, you need patterns that no general-purpose setup provides:
+
+- **Prompt versioning** with semantic versions and eval scores
+- **Hallucination guards** via Zod schema validation on every AI output
+- **Model fallback chains** (Sonnet → Haiku → cache → graceful error)
+- **Context window budgets** with token counting and truncation strategies
+- **Prompt injection defense** with input sanitization
+- **Per-request cost tracking** with daily budgets per user
+- **Evaluation pipelines** — every prompt change runs through automated evals
+
+This workflow encodes all of these as first-class concerns, not afterthoughts.
+
+---
+
+## What You Get
+
+**17 slash commands** forming a complete engineering team:
+
+| Command | Role | What It Does |
+|---|---|---|
+| `/explore` | Product Engineer | Domain exploration — business analysis, personas, competitive research, feature prioritization |
+| `/architect` | Systems Architect | Technical architecture — ADRs, data model, API design, AI architecture, security threat model |
+| `/plan` | Program Manager | Implementation plan — phased tasks ≤2hrs, dependency graph, parallel session strategy |
+| `/implement` | Staff Engineer | Production code — TDD, type-safe, tested, following architecture doc |
+| `/design-ui` | Product Designer | UI/UX — atomic design, accessibility, responsive, AI interaction patterns (streaming, confidence, regeneration) |
+| `/test` | QA Engineer | Test suite — unit, integration, E2E, AI evals, adversarial inputs |
+| `/review` | Principal Engineer | Code review — correctness, security, performance, AI-specific checks (prompt versioning, hallucination guards) |
+| `/security` | Security Engineer | Security audit — OWASP + AI-specific (prompt injection, context poisoning, IDOR, tenant isolation) |
+| `/prompt-engineer` | Prompt Engineer | Prompt lifecycle — design, version, evaluate, guard against hallucination, A/B test |
+| `/debug` | Staff Debugger | Systematic debugging — reproduce, isolate, fix, prevent, regression test |
+| `/commit` | Release Engineer | Structured commits — verify, stage, conventional commit |
+| `/ship` | Release Manager | Pre-deploy checklist — build, test, security, performance, documentation gates |
+| `/monitor` | SRE | Observability — structured logging, error tracking, AI metrics (latency, token usage, eval drift, cost) |
+| `/validate` | QA Engineer | **Runtime verification** — actually runs the app and tests every feature works. Catches hardcoded data, dead buttons, broken auth, IDOR, mocked flows. |
+| `/qa` | QA Lead | **End-to-end user testing** — tests every flow from a real user's perspective. Sign-up → onboarding → core features → edge cases → mobile responsive. Reports UX issues, accessibility violations. |
+| `/context-check` | Context Engineer | **Context efficiency audit** — verifies CLAUDE.md accuracy against codebase, detects stale architecture docs, measures token budget, finds redundant instructions. Keeps the workflow brain healthy. |
+| `/memory` | Knowledge Manager | Session memory — persist decisions, update CLAUDE.md, manage state across sessions |
+
+**5 specialized agents**: librarian, reviewer, qa, devops, performance
+
+**5 reusable skills**: ai-integration, database, logging-monitoring, error-handling, context-management
+
+**3 security hooks**: pre-write-guard (secret scanning, file size), security-scanner (dangerous commands), auto-formatter (Prettier on save)
+
+**CI/CD pipeline**: GitHub Actions with typecheck, lint, test, security audit, AI evals, staged deploy
 
 ---
 
 ## Quick Start
 
 ```bash
-# 1. Copy this setup into your project
-cp -r production-claude-setup/.claude your-project/.claude
-cp -r production-claude-setup/.github your-project/.github
-cp production-claude-setup/CLAUDE.md your-project/CLAUDE.md
-cp production-claude-setup/.mcp.json your-project/.mcp.json
-cp production-claude-setup/.env.example your-project/.env.example
-cp production-claude-setup/.gitignore your-project/.gitignore
-cp -r production-claude-setup/docs your-project/docs
+# Clone into your project
+git clone https://github.com/daniyalmalikoo7/claude-workflow-ai-saas.git my-project
+cd my-project && rm -rf .git && git init
 
-# 2. Customize CLAUDE.md with your project details
-#    (Replace the [PLACEHOLDERS] at the top)
+# Customize CLAUDE.md with your project details
+# Replace [PROJECT_NAME], [Stack], [Deployment]
 
-# 3. Start Claude Code in your project
-cd your-project
+# Start Claude Code
 claude
 
-# 4. Begin the workflow
+# Begin
 /explore I want to build [describe your product]
 ```
 
----
-
-## What's Inside
-
-### Slash Commands (Your Engineering Team)
-
-| Command | Role | What It Does |
-|---|---|---|
-| `/explore` | Product Engineer | Domain exploration — business analysis, user personas, competitive research, feature prioritization |
-| `/architect` | Systems Architect | Complete technical architecture — ADRs, data model, API design, AI architecture, security threat model |
-| `/plan` | Program Manager | Implementation plan — phased tasks ≤2hrs each, dependency graph, Gantt chart |
-| `/implement` | Staff Engineer | Production code — TDD, type-safe, tested, documented, following architecture doc |
-| `/design-ui` | Product Designer | UI/UX — atomic design, accessibility, responsive, AI interaction patterns, micro-interactions |
-| `/test` | QA Engineer | Comprehensive tests — unit, integration, E2E, AI evals, adversarial inputs |
-| `/review` | Principal Engineer | Code review — correctness, security, performance, AI-specific checks |
-| `/security` | Security Engineer | Security audit — OWASP, AI-specific (prompt injection, context poisoning), STRIDE threat model |
-| `/prompt-engineer` | Prompt Engineer | Prompt lifecycle — design, version, evaluate, guard against hallucination |
-| `/debug` | Staff Debugger | Systematic debugging — reproduce, isolate, fix, prevent, add regression test |
-| `/commit` | Release Engineer | Structured commits — verify, stage, conventional commit, atomic changes |
-| `/ship` | Release Manager | Pre-deploy checklist — build, test, security, performance, documentation gates |
-| `/monitor` | SRE | Observability setup and health checks — structured logging, Sentry, PostHog, AI metrics, cost alerts |
-| `/validate` | QA Engineer | **Runtime verification** — actually runs the app and tests every feature works. Catches hardcoded data, dead buttons, broken auth, IDOR, mocked flows. The command that bridges "compiles" → "works." |
-| `/memory` | Knowledge Manager | Persistent memory management — save decisions, update CLAUDE.md, manage session state across sessions |
-
-### Subagents (Background Workers)
-
-| Agent | Trigger | Purpose |
-|---|---|---|
-| `librarian` | On demand | Searches codebase for patterns, answers architecture questions, finds relevant code |
-| `reviewer` | After `/implement` | Automated code review focused on types, security, performance, tests |
-| `qa` | After implementation | Validates against acceptance criteria, runs test suite, checks accessibility |
-| `devops` | On demand | Infrastructure, deployment, monitoring, cost management |
-| `performance` | On demand | Performance profiling and optimization for frontend, backend, and AI calls |
-
-### Skills (Reusable Knowledge)
-
-| Skill | Purpose |
-|---|---|
-| `ai-integration` | Production patterns for provider abstraction, prompt loading, fallback chains, cost tracking, hallucination guards |
-| `database` | Schema design rules, Prisma conventions, query patterns, migration safety |
-| `logging-monitoring` | Structured logger implementation, AI call logging, Sentry/PostHog setup, AI-specific metrics and alert rules |
-| `error-handling` | Typed AppError class hierarchy, React error boundaries, API error wrapper, AI retry-with-backoff pattern |
-| `context-management` | Token counting (tiktoken), context budget enforcement, FIFO and relevance-based truncation strategies |
-
-### Hooks (Automated Guardrails)
-
-| Hook | Trigger | What It Does |
-|---|---|---|
-| `pre-write-guard` | Before any file write | Blocks protected files, enforces 350-line limit, scans for secrets |
-| `security-scanner` | Before any bash command | Blocks dangerous commands (rm -rf, sudo, pipe-to-shell, etc.) |
-| `session-logger` | After every response | Logs session activity for cost tracking and audit |
-| Auto-formatter | After every file write | Runs Prettier on saved files |
+**Setup time**: ~5 minutes. **Time to MVP**: Hours to days, not weeks.
 
 ---
 
-## The Complete Workflow
+## The Workflow
 
 ```
-/explore   →  Understand the domain
-/architect →  Design the system
-/plan      →  Break into executable tasks
-/implement →  Build (parallel sessions)
-/test      →  Verify (write tests)
-/review    →  Quality gate (static)
-/security  →  Security gate (static)
-/monitor   →  Observability setup
-/validate  →  Runtime verification (does it ACTUALLY work?)
-/ship      →  Launch gate (only after /validate passes)
-/memory    →  Persist learnings for next session
+/explore    → Understand the domain, users, market, competitors
+/architect  → Design the system (ADRs, data model, API, AI architecture)
+/plan       → Break into ≤2hr tasks with dependency graph
+/implement  → Build in parallel sessions (Opus for architecture, Sonnet for code)
+/design-ui  → Production UI (Linear/Stripe quality, not Bootstrap templates)
+/test       → Write tests (unit, integration, E2E, AI evals)
+/review     → Static quality gate (catches code-level issues)
+/security   → Static security gate (catches auth, injection, config issues)
+/monitor    → Set up observability (logging, metrics, alerts)
+/validate   → RUNTIME verification (catches everything static analysis misses)
+/ship       → Final deployment gate (only after /validate passes)
 ```
 
-**Full walkthrough**: See `docs/runbooks/orchestration-workflow.md`
+**Full walkthrough**: See [`docs/runbooks/orchestration-workflow.md`](docs/runbooks/orchestration-workflow.md)
 
 ---
 
-## GenAI-Specific Features
+## How This Compares
 
-This setup is designed specifically for building products that incorporate AI. It includes:
+| Feature | This Workflow | gstack (54K★) | superpowers (120K★) | everything-claude-code (50K★) |
+|---|---|---|---|---|
+| Role-based commands | ✅ 15 commands | ✅ 28 commands | ✅ 7-phase methodology | ✅ 60 commands |
+| AI product patterns | ✅ **Full GenAI layer** | ❌ General purpose | ❌ General purpose | ❌ General purpose |
+| Prompt versioning | ✅ Semantic versions + eval scores | ❌ | ❌ | ❌ |
+| Hallucination guards | ✅ Zod validation + confidence scoring | ❌ | ❌ | ❌ |
+| Model fallback chains | ✅ Primary → fallback → cache → error | ❌ | ❌ | ❌ |
+| Cost tracking | ✅ Per-request, per-user budgets | ❌ | ❌ | ❌ |
+| Runtime validation | ✅ `/validate` (infra + wiring) | ✅ `/qa` (browser UI) | ❌ | ❌ |
+| Context management | ✅ Token budgets + truncation | ❌ | ❌ | ❌ |
+| Security hooks | ✅ Pre-write + bash scanner | ✅ Basic | ✅ Via skills | ✅ AgentShield |
+| Architecture-to-ship pipeline | ✅ Structured 11-phase | Flat commands | ✅ 7-phase | Flat commands |
+| Battle-tested | ✅ ProposalPilot (real app) | ✅ YC internal | ✅ Community | ✅ Hackathon winner |
+| AI SaaS specific | ✅ **Purpose-built** | ❌ | ❌ | ❌ |
 
-**Prompt Versioning**: Store prompts as versioned markdown files with metadata (model, temperature, eval scores). Never hardcode prompts in source code.
+**Bottom line**: If you're building a general app, gstack or superpowers are excellent. If you're building a product where **AI is the core feature** — where you need prompt engineering, hallucination prevention, cost optimization, and evaluation pipelines — this is the only workflow that treats those as first-class concerns.
 
-**Hallucination Guards**: Every AI output passes through validation (Zod schemas), confidence scoring, and content filtering before reaching users.
+---
 
-**Context Management**: Token counting, truncation strategies, and context budgets prevent context window overflows and control costs.
+## Battle-Tested: What We Found
 
-**Prompt Injection Defense**: User inputs are sanitized before injection into prompts. System and user messages are strictly separated.
+This workflow was validated by building [ProposalPilot](https://github.com/daniyalmalikoo7) — a real AI-powered proposal engine with 9 database models, tRPC API, Clerk auth, Stripe billing, Tiptap editor, SSE streaming, and pgvector semantic search.
 
-**Model Fallback Chain**: Primary model → fallback model → semantic cache → graceful error. Never show users a raw API failure.
+The app passed `/review`, `/security`, and `/ship`. Then we actually ran it and discovered:
 
-**Cost Tracking**: Every AI call logs token counts, model used, latency, and estimated cost. Per-user daily budgets prevent runaway spending.
+| Bug | Which command missed it | Now caught by |
+|---|---|---|
+| Hardcoded demo data on every page | `/review` said "looks good" | `/validate` Phase 3.2 |
+| Auth middleware existed but didn't protect routes | `/security` checked code, not behavior | `/validate` Phase 3.1 |
+| Buttons rendered but triggered no actions | Nothing | `/validate` Phase 3.2 |
+| Onboarding was a UI mock with `setTimeout` | `/review` said "onboarding exists ✅" | `/validate` Phase 3.3 |
+| IDOR in 6 API procedures | `/security` missed it | `/validate` Phase 4.1 |
+| CSP headers blocked auth provider's JavaScript | `/security` checked headers, not runtime | `/validate` Phase 5.1 |
+| `PostResponse` hook event crashed Claude Code | Nothing | `/validate` Phase 1.6 |
+| New users hit "Organization not found" | Nothing | `/validate` Phase 4.2 |
 
-**Evaluation Pipeline**: Every prompt has an eval dataset. Prompt changes must maintain or improve eval scores.
+Every bug found became a check in `/validate`. This isn't a theoretical workflow — it's one that failed, learned, and got better.
 
-**Anti-Hallucination Patterns**: Structured outputs (JSON schemas), confidence thresholds, source citation requirements, and human-in-the-loop for high-stakes decisions.
+---
+
+## GenAI Product Layer (The Differentiator)
+
+### Prompt Versioning
+```markdown
+# docs/prompts/requirement-extractor.v1.md
+---
+id: requirement-extractor
+version: 1.0.0
+model: claude-haiku-4-5-20251001
+temperature: 0.1
+eval_score: 0.92
+last_evaluated: 2026-03-30
+---
+[System message here]
+```
+
+### Hallucination Guards
+Every AI output passes through validation before reaching users:
+- JSON structure validation (Zod schemas)
+- Confidence scoring with thresholds
+- Source citation verification against knowledge base
+- Fabricated URL/reference detection
+
+### Model Fallback Chain
+```
+Primary (Sonnet) → Fallback (Haiku) → Cached response → Graceful error
+```
+Each step: exponential backoff with jitter, Zod validation, hallucination guard check.
+
+### Cost Tracking
+Every AI call logs: prompt hash, model, tokens in/out, latency, cache hit, estimated USD cost. Per-user daily budgets prevent runaway spending.
 
 ---
 
 ## Customization
 
-### Adapt CLAUDE.md to Your Stack
+### Adapt CLAUDE.md
+The `CLAUDE.md` file is the brain. Customize:
+1. **Project Context**: Your project name, stack, deployment target
+2. **Critical Commands**: Your build/test/lint commands
+3. **Architecture Invariants**: Add project-specific rules
 
-The `CLAUDE.md` file is the brain. Customize these sections for your project:
-
-1. **Project Context**: Your actual project name, tech stack, deployment target
-2. **Critical Commands**: Your actual build/test/lint commands
-3. **File Organization**: Your actual directory structure
-4. **Architecture Invariants**: Add any project-specific rules
-
-### Add More MCP Servers
-
-Edit `.mcp.json` to add integrations:
-
-```json
-{
-  "mcpServers": {
-    "postgres": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-postgres"],
-      "env": { "DATABASE_URL": "${DATABASE_URL}" }
-    },
-    "sentry": {
-      "command": "npx",
-      "args": ["-y", "@sentry/mcp-server"],
-      "env": { "SENTRY_AUTH_TOKEN": "${SENTRY_AUTH_TOKEN}" }
-    }
-  }
-}
-```
+### Add MCP Servers
+Edit `.mcp.json` to add integrations (Postgres, Sentry, GitHub, etc.)
 
 ### Add Custom Commands
-
-Create new files in `.claude/commands/`:
-
+Create files in `.claude/commands/`:
 ```markdown
 # .claude/commands/my-command.md
 You are a [role] responsible for [task].
-
 ## Process
 1. Step one
 2. Step two
-
 $ARGUMENTS
 ```
 
-Then use with: `/my-command [arguments]`
+---
+
+## Parallel Session Strategy
+
+For maximum throughput, run 3-5 sessions:
+
+```
+Terminal 1 (Opus)    → Architecture, review, security decisions
+Terminal 2 (Sonnet)  → Feature implementation
+Terminal 3 (Sonnet)  → UI components
+Terminal 4 (Sonnet)  → Tests and AI evals
+Terminal 5 (Haiku)   → Quick questions, docs, simple tasks
+```
+
+Use `/clear` between major tasks. The architecture docs on disk ARE the context — Claude reads them fresh each session.
 
 ---
 
-## Recommended Parallel Session Layout
+## Sources
 
-For maximum throughput, run 3-5 sessions simultaneously:
+This workflow synthesizes patterns from the best in the ecosystem:
 
-```
-┌──────────────────────────────────────────────────────┐
-│ Terminal 1 (Opus)    │ Terminal 2 (Sonnet)            │
-│ Architecture/Review  │ Feature Implementation         │
-├──────────────────────┤────────────────────────────────│
-│ Terminal 3 (Sonnet)  │ Terminal 4 (Sonnet)            │
-│ UI Components        │ Tests & AI Evals               │
-├──────────────────────┤────────────────────────────────│
-│ Terminal 5 (Haiku)                                    │
-│ Quick questions, docs, simple tasks                   │
-└──────────────────────────────────────────────────────┘
-```
-
-Use `git worktrees` for parallel development on separate branches:
-```bash
-git worktree add ../project-auth feature/auth
-git worktree add ../project-dashboard feature/dashboard
-git worktree add ../project-ai feature/ai-integration
-```
-
----
-
-## Inspired By
-
-This setup synthesizes the best patterns from:
-- **[anthropics/claude-code](https://github.com/anthropics/claude-code)** — Official reference
-- **[everything-claude-code](https://github.com/anthropics/skills)** — 28 agents, 119 skills
-- **[obra/superpowers](https://github.com/obra/superpowers)** — 7-phase development methodology
-- **[garrytan/gstack](https://github.com/garrytan/gstack)** — Role-based engineering team
-- **[trailofbits/claude-code-config](https://github.com/trailofbits/claude-code-config)** — Security-first defaults
-- **Boris Cherny's setup** — Claude Code creator's own workflow
-- **Builder.io's guides** — Steve Sewell's production tips
+- [anthropics/claude-code](https://github.com/anthropics/claude-code) — Official reference
+- [obra/superpowers](https://github.com/obra/superpowers) — Development methodology (120K+ ★)
+- [garrytan/gstack](https://github.com/garrytan/gstack) — Role-based engineering team (54K+ ★)
+- [trailofbits/claude-code-config](https://github.com/trailofbits/claude-code-config) — Security-first defaults
+- [Anthropic best practices](https://www.anthropic.com/engineering/claude-code-best-practices) — Official guidance
+- Boris Cherny (Claude Code creator) — Parallel sessions, shared CLAUDE.md
+- Steve Sewell (Builder.io) — Production tips, `/clear` aggressively
 
 ---
 
