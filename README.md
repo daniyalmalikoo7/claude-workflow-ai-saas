@@ -4,7 +4,7 @@
 
 This is a drop-in Claude Code configuration that gives you a team of specialized agents, battle-tested workflows, and production-grade guardrails — the kind of setup used to build products at companies like Stripe, Linear, and Vercel.
 
-**What you get**: 14 slash commands, 5 specialized agents, 5 reusable skills, 3 security hooks, CI/CD pipeline, cost tracking, prompt versioning, hallucination guards, and a complete build-to-ship orchestration workflow.
+**What you get**: 15 slash commands, 5 specialized agents, 5 reusable skills, 3 security hooks, CI/CD pipeline, cost tracking, prompt versioning, hallucination guards, and a complete build-to-ship orchestration workflow.
 
 **Time to set up**: ~15 minutes.
 **Time to ship an MVP**: Hours to days, not weeks.
@@ -55,6 +55,7 @@ claude
 | `/commit` | Release Engineer | Structured commits — verify, stage, conventional commit, atomic changes |
 | `/ship` | Release Manager | Pre-deploy checklist — build, test, security, performance, documentation gates |
 | `/monitor` | SRE | Observability setup and health checks — structured logging, Sentry, PostHog, AI metrics, cost alerts |
+| `/validate` | QA Engineer | **Runtime verification** — actually runs the app and tests every feature works. Catches hardcoded data, dead buttons, broken auth, IDOR, mocked flows. The command that bridges "compiles" → "works." |
 | `/memory` | Knowledge Manager | Persistent memory management — save decisions, update CLAUDE.md, manage session state across sessions |
 
 ### Subagents (Background Workers)
@@ -95,11 +96,12 @@ claude
 /architect →  Design the system
 /plan      →  Break into executable tasks
 /implement →  Build (parallel sessions)
-/test      →  Verify
-/review    →  Quality gate
-/security  →  Security gate
+/test      →  Verify (write tests)
+/review    →  Quality gate (static)
+/security  →  Security gate (static)
 /monitor   →  Observability setup
-/ship      →  Launch gate
+/validate  →  Runtime verification (does it ACTUALLY work?)
+/ship      →  Launch gate (only after /validate passes)
 /memory    →  Persist learnings for next session
 ```
 

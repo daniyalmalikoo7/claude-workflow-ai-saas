@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.1.0] — 2026-03-31
+
+### Added
+- `/validate` command — runtime verification that actually tests if the app works. Checks database connectivity, env vars, page wiring (detects hardcoded demo data, dead buttons, mocked flows), tenant isolation (IDOR detection), new user lifecycle, AI pipeline, and CSP configuration. Bridges the gap between "compiles" and "works" that all other commands miss.
+
+### Changed
+- Orchestration workflow: `/validate` added to Phase 7 pre-launch sequence between `/monitor` and `/ship`
+- README: updated to 15 commands, added /validate to command table and workflow diagram
+
+### Lessons Learned
+- During real-world testing of ProposalPilot, the app passed /review, /security, and /ship but was fundamentally broken: hardcoded demo data on every page, auth middleware not protecting routes, buttons that triggered no actions, onboarding was a UI mock, IDOR in 6 API procedures. All of these would have been caught by /validate.
+
 ## [2.0.0] — 2026-03-28
 
 ### Added

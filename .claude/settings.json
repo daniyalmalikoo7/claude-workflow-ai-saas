@@ -86,13 +86,6 @@
           }
         ]
       }
-    ],
-    "PostResponse": [
-      {
-        "type": "command",
-        "command": "node .claude/hooks/session-logger.mjs",
-        "description": "Log session activity for cost tracking and audit"
-      }
     ]
   },
   "env": {

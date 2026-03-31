@@ -151,12 +151,18 @@ Session 4: /design-ui [AI interaction UX — streaming, confidence
 **Run in sequence**:
 
 ```
-1. /security — Full security audit
-2. /review — Full codebase review  
+1. /review — Full codebase review (static analysis)
+2. /security — Security audit (static + config analysis)
 3. /test — Full test suite with coverage report
 4. /monitor — Set up observability (structured logger, Sentry, PostHog, AI metrics, alerts)
-5. /ship — Pre-deployment checklist
+5. /validate — CRITICAL: Actually run the app and verify every feature works.
+              This catches what all the above miss: hardcoded data, dead buttons,
+              broken auth, unresolved env vars, IDOR bugs, mocked onboarding.
+              Fix everything /validate finds before proceeding.
+6. /ship — Pre-deployment checklist (only after /validate passes)
 ```
+
+**Why this order matters:** /review and /security check the code. /validate checks the product. /ship checks deployment readiness. If you skip /validate, you will ship an app that compiles but doesn't work.
 
 Fix any blockers found. Re-run `/ship` until green.
 
