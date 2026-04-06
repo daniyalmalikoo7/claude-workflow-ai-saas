@@ -1,0 +1,36 @@
+{
+  "name": "claude-workflow-ai-saas",
+  "version": "2.3.0",
+  "description": "28-agent SDLC pipeline for AI-native SaaS — from idea to shipped product in 5 phases with enforced quality gates",
+  "author": "daniyalmalikoo7",
+  "license": "MIT",
+  "repository": "https://github.com/daniyalmalikoo7/claude-workflow-ai-saas",
+  "commands": [
+    "discover",
+    "design",
+    "build",
+    "validate",
+    "ship",
+    "status",
+    "fix"
+  ],
+  "agents": 28,
+  "hooks": 7,
+  "skills": 5,
+  "phases": 5,
+  "tags": [
+    "saas",
+    "ai-native",
+    "sdlc",
+    "production",
+    "agents",
+    "phase-gates",
+    "quality-gates",
+    "design-system",
+    "security",
+    "performance"
+  ],
+  "compatibility": {
+    "claude-code": ">=2.1.0"
+  }
+}

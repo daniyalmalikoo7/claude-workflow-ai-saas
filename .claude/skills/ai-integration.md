@@ -1,204 +1,107 @@
-# Skill: AI Integration Layer
+# AI Integration Standard
 
-Build production-grade AI integration following these exact patterns.
+The GenAI product layer that no other workflow has. This standard governs
+every AI feature in the SaaS product.
 
-## Provider Abstraction
+## Prompt versioning
 
-Always abstract the AI provider behind an interface:
+- **Every prompt is a versioned file** in `docs/prompts/[name].v[N].md`.
+- **Format:** System prompt, user template with `{{variables}}`, expected output format.
+- **Never edit a prompt in code.** Edit the versioned file, update the version reference.
+- **Changelog:** Each prompt file includes a history section with date, change, and reason.
+
+```
+docs/prompts/
+├── section-generator.v3.md
+├── requirement-extractor.v2.md
+├── confidence-scorer.v1.md
+└── kb-retriever.v2.md
+```
+
+## LLM call wrapper
+
+Every LLM call goes through a single wrapper that handles:
 
 ```typescript
-// src/lib/ai/providers/types.ts
-export interface AIProvider {
-  generate(params: GenerateParams): Promise<GenerateResult>;
-  stream(params: GenerateParams): AsyncIterable<StreamChunk>;
-  countTokens(text: string): number;
-}
-
-export interface GenerateParams {
-  promptId: string;
-  promptVersion: string;
-  systemMessage: string;
-  userMessage: string;
+async function callLLM(options: {
+  prompt: string;
+  model: string;          // Primary model
+  fallbackModel?: string; // Fallback if primary fails
   maxTokens: number;
   temperature: number;
-  responseSchema?: ZodSchema;
-}
-
-export interface GenerateResult {
-  content: string;
-  parsed?: unknown;
-  usage: { inputTokens: number; outputTokens: number; cost: number };
-  latencyMs: number;
-  model: string;
-  cached: boolean;
-}
+  timeoutMs?: number;     // Default 30000
+  retries?: number;       // Default 3
+  userId: string;         // For cost attribution
+  promptVersion: string;  // e.g. "section-generator.v3"
+}): Promise<LLMResponse>
 ```
 
-## Prompt Template Pattern
+The wrapper provides:
+1. **Timeout:** Abort after `timeoutMs` (default 30s). Show user "Generation timed out."
+2. **Retry with backoff:** 1s, 2s, 4s delays. Different error for rate limit vs server error.
+3. **Fallback chain:** Primary model → fallback model → graceful degradation message.
+4. **Cost logging:** Log `{ model, tokens_in, tokens_out, cost_usd, user_id, prompt_version, latency_ms }`.
+5. **Error classification:** Distinguish retryable (rate limit, timeout) from fatal (invalid key, quota).
+
+## Hallucination guards
+
+- **Grounded generation:** When generating content from a knowledge base, the prompt must
+  instruct the model to cite which KB chunks it used. Output without citations = flagged.
+- **Confidence scoring:** Every AI-generated section gets a confidence score (0-100) based on:
+  - KB coverage: what % of the section's claims are grounded in retrieved chunks
+  - Retrieval relevance: cosine similarity scores of retrieved chunks
+  - Completeness: does the section address all relevant requirements
+- **User visibility:** Confidence score displayed as a badge. <30% = red, 30-70% = amber, >70% = green.
+- **Regeneration:** Users can regenerate any section with updated KB context or requirements.
+
+## Streaming
+
+- **SSE (Server-Sent Events)** for long-running generation (>2s expected).
+- **Progress indication:** Stream tokens as they arrive. Show typing indicator.
+- **Cancelation:** User can cancel in-progress generation. Clean up server-side.
+- **Error recovery:** If stream breaks mid-generation, show partial content + "Generation interrupted. Tap to retry."
+- **Implementation:** Use `ReadableStream` with `TextEncoder`. Flush chunks immediately.
+
+## Eval pipeline
+
+Every prompt must have evaluation test cases:
+
+```
+tests/evals/
+├── section-generator.eval.ts
+├── requirement-extractor.eval.ts
+└── confidence-scorer.eval.ts
+```
+
+Each eval file contains ≥3 test cases:
+1. **Happy path:** Typical input → expected output characteristics
+2. **Edge case:** Minimal input → graceful handling
+3. **Adversarial:** Prompt injection attempt → no system prompt leakage
+
+Eval scoring: assert on output structure, key content presence, and absence of prohibited content.
+Run evals before deploying prompt version changes.
+
+## Cost tracking
+
+- **Per-request logging:** Every LLM call logs cost in USD based on model pricing.
+- **Per-user aggregation:** Dashboard shows cost per user per day/week/month.
+- **Budget alerts:** Configurable threshold (e.g., $50/day). Alert via email/Slack when exceeded.
+- **Cost attribution:** Every AI feature has a cost center. Know exactly what each feature costs.
+- **Model pricing table:** Maintained as config. Updated when providers change pricing.
 
 ```typescript
-// src/lib/ai/prompts/base.ts
-import { readFileSync } from "fs";
-import { join } from "path";
-import matter from "gray-matter";
-
-export function loadPrompt(promptId: string, version?: string) {
-  const dir = join(process.cwd(), "docs", "prompts");
-  // Find latest version if not specified
-  const file = readFileSync(join(dir, `${promptId}.v${version || "latest"}.md`), "utf-8");
-  const { data: metadata, content } = matter(file);
-
-  const [systemMessage, userTemplate] = content.split("<user>");
-
-  return {
-    metadata,
-    systemMessage: systemMessage.replace("<s>", "").replace("</s>", "").trim(),
-    userTemplate: userTemplate?.replace("</user>", "").trim() || "",
-  };
-}
-
-export function renderPrompt(template: string, variables: Record<string, string>) {
-  return template.replace(/\{\{(\w+)\}\}/g, (_, key) => {
-    if (!(key in variables)) throw new Error(`Missing prompt variable: ${key}`);
-    return sanitizeForPrompt(variables[key]);
-  });
-}
-
-function sanitizeForPrompt(input: string): string {
-  // Prevent prompt injection by escaping control sequences
-  return input
-    .replace(/<\/?s>/g, "")          // Remove system message tags
-    .replace(/<\/?user>/g, "")        // Remove user message tags
-    .replace(/\{\{/g, "{ {")          // Escape template syntax
-    .slice(0, 10000);                  // Hard length limit
-}
+const MODEL_PRICING = {
+  'gemini-2.5-flash': { input_per_1k: 0.00015, output_per_1k: 0.0006 },
+  'claude-sonnet-4-20250514': { input_per_1k: 0.003, output_per_1k: 0.015 },
+  // Add new models here
+};
 ```
 
-## Fallback Chain Pattern
+## RAG implementation
 
-```typescript
-// src/lib/ai/fallback-chain.ts
-export async function executeWithFallback<T>(
-  params: GenerateParams,
-  schema: ZodSchema<T>,
-  options?: { maxRetries?: number }
-): Promise<{ data: T; metadata: GenerateResult }> {
-  const chain = [
-    { provider: "anthropic", model: "claude-sonnet-4-20250514" },
-    { provider: "anthropic", model: "claude-haiku-4-5-20251001" },
-    { provider: "cache",     model: "semantic-cache" },
-  ];
-
-  for (const step of chain) {
-    try {
-      const result = await callWithRetry(step, params, options?.maxRetries ?? 2);
-      const parsed = schema.safeParse(JSON.parse(result.content));
-
-      if (parsed.success) {
-        return { data: parsed.data, metadata: result };
-      }
-
-      logger.warn("AI output failed schema validation", {
-        promptId: params.promptId,
-        model: step.model,
-        errors: parsed.error.issues,
-      });
-      // Try next in chain
-    } catch (error) {
-      logger.error("AI provider failed", {
-        provider: step.provider,
-        model: step.model,
-        error: error instanceof Error ? error.message : "Unknown",
-      });
-      // Try next in chain
-    }
-  }
-
-  throw new AIError("All providers in fallback chain exhausted", { params });
-}
-```
-
-## Cost Tracking Pattern
-
-```typescript
-// src/lib/ai/cost-tracker.ts
-const MODEL_COSTS = {
-  "claude-sonnet-4-20250514": { input: 3.0 / 1_000_000, output: 15.0 / 1_000_000 },
-  "claude-haiku-4-5-20251001": { input: 0.80 / 1_000_000, output: 4.0 / 1_000_000 },
-  "claude-opus-4-6": { input: 15.0 / 1_000_000, output: 75.0 / 1_000_000 },
-} as const;
-
-export function calculateCost(model: string, inputTokens: number, outputTokens: number): number {
-  const rates = MODEL_COSTS[model as keyof typeof MODEL_COSTS];
-  if (!rates) return 0;
-  return inputTokens * rates.input + outputTokens * rates.output;
-}
-
-export function logAICall(result: GenerateResult, promptId: string) {
-  logger.info("ai_call", {
-    promptId,
-    model: result.model,
-    inputTokens: result.usage.inputTokens,
-    outputTokens: result.usage.outputTokens,
-    cost: result.usage.cost,
-    latencyMs: result.latencyMs,
-    cached: result.cached,
-  });
-}
-```
-
-## Hallucination Guard Pattern
-
-```typescript
-// src/lib/ai/guards/hallucination.ts
-export interface HallucinationCheck {
-  name: string;
-  check: (output: string, context: string) => Promise<boolean>;
-  severity: "block" | "warn";
-}
-
-export const defaultGuards: HallucinationCheck[] = [
-  {
-    name: "json_validity",
-    check: async (output) => { try { JSON.parse(output); return true; } catch { return false; } },
-    severity: "block",
-  },
-  {
-    name: "no_fabricated_urls",
-    check: async (output) => {
-      const urls = output.match(/https?:\/\/[^\s]+/g) || [];
-      // Only allow URLs that were in the context
-      return urls.length === 0; // Override per-prompt as needed
-    },
-    severity: "warn",
-  },
-  {
-    name: "confidence_threshold",
-    check: async (output) => {
-      const parsed = JSON.parse(output);
-      return !parsed.confidence || parsed.confidence >= 0.7;
-    },
-    severity: "warn",
-  },
-];
-
-export async function runGuards(
-  output: string,
-  context: string,
-  guards: HallucinationCheck[] = defaultGuards
-): Promise<{ passed: boolean; failures: string[] }> {
-  const failures: string[] = [];
-
-  for (const guard of guards) {
-    const passed = await guard.check(output, context);
-    if (!passed) {
-      failures.push(guard.name);
-      if (guard.severity === "block") {
-        return { passed: false, failures };
-      }
-    }
-  }
-
-  return { passed: failures.length === 0, failures };
-}
-```
+- **Chunking:** 512 tokens per chunk, 50-token overlap. Respect paragraph boundaries.
+- **Embedding model:** Voyage AI or OpenAI text-embedding-3-small. Dimension: 1024.
+- **Vector store:** pgvector with HNSW index (`lists = rows/1000`, `probes = lists/10`).
+- **Retrieval:** Top-k=5 chunks by cosine similarity. Threshold: reject chunks with similarity <0.3.
+- **Context window management:** Retrieved chunks + prompt + requirements must fit in model context.
+  Calculate token count before sending. Truncate lowest-similarity chunks if needed.

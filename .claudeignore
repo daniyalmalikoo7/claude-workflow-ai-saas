@@ -1,59 +1,9 @@
-# Dependencies
 node_modules/
-.pnp/
-.pnp.js
-
-# Build outputs
 .next/
-out/
 dist/
-build/
-.turbo/
-.vercel/
-
-# Lock files (too large, no signal)
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
-
-# Generated
-*.generated.ts
-*.generated.js
-prisma/migrations/*/migration.sql
-tsconfig.tsbuildinfo
-
-# Static assets (no code signal)
-public/
-*.ico
-*.png
-*.jpg
-*.jpeg
-*.gif
-*.svg
-*.woff
-*.woff2
-*.ttf
-*.eot
-
-# Test artifacts
-coverage/
-.nyc_output/
-playwright-report/
-test-results/
-
-# Environment (secrets)
 .env
 .env.local
 .env.production
-.env.staging
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-.DS_Store
-
-# Logs
 *.log
-npm-debug.log*
+.git/
+coverage/

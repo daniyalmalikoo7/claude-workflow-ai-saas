@@ -1,0 +1,11 @@
+{
+  "project": "",
+  "currentPhase": 0,
+  "phases": {
+    "0": { "status": "not-started", "startedAt": null, "completedAt": null, "artifacts": [], "decision": null },
+    "1": { "status": "not-started", "startedAt": null, "completedAt": null, "artifacts": [] },
+    "2": { "status": "not-started", "startedAt": null, "completedAt": null },
+    "3": { "status": "not-started", "startedAt": null, "completedAt": null, "reports": [] },
+    "4": { "status": "not-started", "startedAt": null, "completedAt": null }
+  }
+}

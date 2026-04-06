@@ -1,54 +1,74 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+## [2.3.0] — 2026-04-04
 
-The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+### The Overhaul: From Prompt Collection to Automation System
 
-## [2.2.0] — 2026-03-31
-
-### Added
-- `/qa` command — end-to-end quality assurance from a real user's perspective. Tests every user flow: sign-up → onboarding → core features → edge cases → mobile responsive. Reports visual issues, accessibility violations, and broken flows. Complements `/validate` (infrastructure) with user-facing verification.
-- `/context-check` command — audits Claude Code's context efficiency. Verifies CLAUDE.md accuracy against actual codebase, detects stale architecture docs, measures token budget usage, finds redundant instructions, and identifies missing project knowledge. Keeps the workflow's "brain" healthy.
-- `.claude-plugin/plugin.json` — marketplace manifest enabling installation via `/plugin marketplace add daniyalmalikoo7/claude-workflow-ai-saas`
-- `.claudeignore` — excludes node_modules, build artifacts, lock files, and static assets from Claude's context window, saving thousands of tokens per session
-- Competitive positioning in README — clear comparison table showing differentiation from gstack, superpowers, and everything-claude-code
-
-### Changed
-- Complete README rewrite — leads with the value proposition ("the only Claude Code workflow built specifically for shipping AI-powered SaaS products"), includes battle-test results table, GenAI product layer documentation, and competitive comparison
-- Command count: 15 → 17 (added /qa and /context-check)
-
-### Quality Gates (Updated Workflow)
-The pre-launch sequence is now:
-```
-/review          → Static code quality (reads code)
-/security        → Static security audit (reads code)
-/test            → Write test suite (reads code)
-/monitor         → Set up observability (configures infra)
-/validate        → Runtime infrastructure verification (runs the app)
-/qa              → End-to-end user flow testing (uses the app)
-/context-check   → Verify Claude's context is accurate and efficient
-/ship            → Final deployment gate
-```
-
-## [2.1.0] — 2026-03-31
+v2.3.0 is a complete rewrite. The workflow system was critiqued as "theater" — 
+ProposalPilot, the battle-test product, was built by ignoring the entire system.
+v2.3.0 fixes the 7 systemic failures identified in the critique and rebuilds
+every component to produce predictable, validatable, high-quality output.
 
 ### Added
-- `/validate` command — runtime verification that actually tests if the app works. Checks database connectivity, env vars, page wiring (detects hardcoded demo data, dead buttons, mocked flows), tenant isolation (IDOR detection), new user lifecycle, AI pipeline, and CSP configuration. Bridges the gap between "compiles" and "works" that all other commands miss.
+
+**28 Agent Files (complete operating manuals)**
+- 7 Phase 0 agents: domain-researcher, business-strategist, product-expert, business-analyst (adversarial), due-diligence-engineer, technical-risk-analyst, devils-advocate
+- 6 Phase 1 agents: system-architect, ux-designer (merged with UX researcher), ui-designer (produces code), security-architect (testable threat model), data-architect (actual Prisma schema), performance-architect (P50/P95/P99)
+- 6 Phase 2 agents: frontend-engineer, backend-engineer, ai-ml-engineer, database-engineer, devops-engineer, qa-engineer (embedded)
+- 5 Phase 3 agents: qa-lead, performance-engineer, security-engineer, accessibility-engineer, code-reviewer
+- 4 Phase 4 agents: release-manager, monitoring-engineer, cost-engineer, growth-analyst
+
+**7 Command Files (orchestrators with self-validation)**
+- /discover — 7-agent Phase 0 with artifact validation and retry
+- /design — 6-agent Phase 1 producing code artifacts
+- /build — work package decomposition for parallel worktrees
+- /validate — 5-agent Phase 3 measuring against Phase 1 specs
+- /ship — 4-agent Phase 4 with deployment preparation
+- /status — project state dashboard
+- /fix — systematic finding resolution from validation reports
+
+**7 Hook Files (deterministic enforcement)**
+- artifact-validate.sh — three-tier validation (BLOCK/WARN/PASS)
+- phase-gate.sh — blocks phase transitions until prerequisites met
+- quality-gate.sh — blocks on tsc/lint/build/test failures
+- security-scanner.sh — blocks secrets in staged files
+- session-start.sh — auto-reads project state
+- session-end.sh — auto-checkpoints memory
+- auto-commit.sh — conventional commits on clean gate
+
+**5 Skill Files (shared knowledge)**
+- engineering-standard.md — rules (machine-enforced) + guidelines (agent-enforced)
+- uiux-standard.md — Netflix/Apple benchmark with enforceable specifics
+- security-patterns.md — concrete patterns with implementation code
+- ai-integration.md — prompt versioning, eval pipelines, hallucination guards, cost tracking
+- performance-budget.md — industry benchmarks with measurement commands
+
+**State Machine**
+- phase.json tracks current phase, completion timestamps, artifact paths, decisions
+- Phase gates read state and enforce transitions deterministically
 
 ### Changed
-- Orchestration workflow: `/validate` added to Phase 7 pre-launch sequence between `/monitor` and `/ship`
-- README: updated to 15 commands, added /validate to command table and workflow diagram
+
+- Agent count: 32 → 28 (removed redundancy, improved depth)
+- UX Researcher merged into UX Designer (research-then-wireframe in one artifact)
+- Engineering Manager cut (sequencing handled by /build command)
+- Principal Engineer cut (enforcement via skill + hook + Phase 3 Code Reviewer)
+- Cloud Specialist merged into DevOps Engineer (one role for solo developer)
+- Incident Commander merged into Release Manager (basic runbook, not full incident process)
+- Strategic Planner renamed to Technical Risk Analyst (concrete risks, not 2-year speculation)
+- Phase 1 agents produce code (Tailwind config, Prisma schema, test commands) not prose
+- /build produces work packages for parallel execution instead of sequential single-session
 
 ### Fixed
-- Removed invalid `PostResponse` hook event from `settings.json` — only `PreToolUse`, `PostToolUse`, `Notification`, and `Stop` are valid Claude Code hook events
 
-### Lessons Learned
-- During real-world testing of ProposalPilot, the app passed /review, /security, and /ship but was fundamentally broken: hardcoded demo data on every page, auth middleware not protecting routes, buttons that triggered no actions, onboarding was a UI mock, IDOR in 6 API procedures. All of these would have been caught by /validate.
+- Commands now self-validate artifacts after each agent (retry on failure)
+- Phase gates now actually enforced (shell scripts with exit 2)
+- Artifact validation checks content quality, not just file existence
+- Session management automated (hooks, not human discipline)
+- Quality standards enforced by hooks, not just documented in skill files
 
-## [2.0.0] — 2026-03-28
+## [2.2.0] — 2026-03-28
 
-### Added
-- Initial release with 14 slash commands, 5 agents, 5 skills, 3 hooks, CI/CD pipeline
-- GenAI product layer: prompt versioning, hallucination guards, fallback chains, eval pipelines, context budgets, cost tracking
-- Complete orchestration workflow from /explore to /ship
-- Synthesized patterns from obra/superpowers, garrytan/gstack, trailofbits/claude-code-config, Boris Cherny's setup, Builder.io guides, and Anthropic best practices
+- Initial release with 17 commands, 5 agents, 3 hooks
+- GenAI product layer (prompt versioning, hallucination guards, cost tracking)
+- Battle-tested by ProposalPilot (identified systemic failures that drove v2.3.0)
