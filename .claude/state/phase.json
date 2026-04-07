@@ -1,0 +1,37 @@
+{
+  "project": "AI-Powered Proposal Generator",
+  "currentPhase": 2,
+  "phases": {
+    "0": {
+      "status": "complete",
+      "startedAt": "2026-04-07T00:00:00Z",
+      "completedAt": "2026-04-07T00:30:00Z",
+      "artifacts": [
+        "docs/discovery/01-domain-research.md",
+        "docs/discovery/02-strategy-brief.md",
+        "docs/discovery/03-prd.md",
+        "docs/discovery/04-requirements.md",
+        "docs/discovery/05-feasibility.md",
+        "docs/discovery/06-risk-analysis.md",
+        "docs/discovery/07-go-nogo.md"
+      ],
+      "decision": "GO"
+    },
+    "1": {
+      "status": "complete",
+      "startedAt": "2026-04-07T01:00:00Z",
+      "completedAt": "2026-04-07T02:00:00Z",
+      "artifacts": [
+        "docs/design/01-technical-design.md",
+        "docs/design/02-ux-design.md",
+        "docs/design/03-design-system.md",
+        "docs/design/04-security-design.md",
+        "docs/design/05-data-model.md",
+        "docs/design/06-performance-spec.md"
+      ]
+    },
+    "2": { "status": "not-started", "startedAt": null, "completedAt": null },
+    "3": { "status": "not-started", "startedAt": null, "completedAt": null, "reports": [] },
+    "4": { "status": "not-started", "startedAt": null, "completedAt": null }
+  }
+}
