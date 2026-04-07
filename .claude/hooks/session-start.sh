@@ -8,7 +8,15 @@ MEMORY_STATE="docs/memory/STATE.md"
 BLOCKERS="docs/memory/BLOCKERS.md"
 
 # Only print once per session (use a temp marker)
-MARKER="/tmp/.claude-session-started-$(pwd | md5sum | cut -d' ' -f1)"
+# Cross-platform: macOS uses md5, Linux uses md5sum
+if command -v md5sum &>/dev/null; then
+  HASH=$(pwd | md5sum | cut -d' ' -f1)
+elif command -v md5 &>/dev/null; then
+  HASH=$(pwd | md5 -q)
+else
+  HASH=$(pwd | cksum | cut -d' ' -f1)
+fi
+MARKER="/tmp/.claude-session-started-${HASH}"
 if [[ -f "$MARKER" ]]; then
   exit 0  # Already printed this session
 fi

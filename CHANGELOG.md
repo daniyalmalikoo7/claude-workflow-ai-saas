@@ -1,5 +1,33 @@
 # Changelog
 
+## [2.3.1] — 2026-04-07
+
+### Assembly-First: Single Source of Truth
+
+Tested on two products (AI Proposal Generator + SOC 2 Compliance Platform).
+Phase 0 + Phase 1 produce 30K+ words of principal-level output per product.
+
+### Added
+
+- **assembly-stack.md** — new skill file. Single source of truth for all services, MCPs, Shadcn components, and stack defaults. Every agent inherits this via CLAUDE.md.
+
+### Changed
+
+- **CLAUDE.md** — references assembly-stack.md skill. "What You Never Do" includes building what Shadcn/services provide.
+- **engineering-standard.md** — cleaned up duplicate sections. References assembly-stack.md. Added stack version pins (Next.js 16+, Prisma 6+, Tailwind v4).
+- **ui-designer.md** — rewritten to extend Shadcn/ui. Outputs CSS variable overrides + Shadcn install list. Never designs custom Button/Dialog/Table.
+- **system-architect.md** — must include MCP configuration, alternative evaluation per tech choice, assembly stack section.
+- **frontend-engineer.md** — Shadcn-first: `npx shadcn@latest init`, install components, compose custom from primitives.
+- **backend-engineer.md** — Upstash `@upstash/ratelimit` for rate limiting, Inngest for background jobs, Resend for email.
+- **devops-engineer.md** — Sentry (3 lines setup), PostHog (drop-in). Never build custom monitoring.
+- **build.md** — work packages updated: Shadcn init for frontend, Upstash/Inngest/Resend for backend, Sentry/PostHog for devops.
+- **session-start.sh** — fixed macOS compatibility (`md5` instead of `md5sum`).
+- **session-end.sh** — fixed macOS compatibility.
+
+### Removed
+
+- All v2.2.0 leftover files: `.github/workflows/`, `.env.example`, `.mcp.json`, `CONTRIBUTING.md`, `docs/case-studies/`, `docs/architecture/`, `docs/examples/`, `docs/prompts/`, `docs/runbooks/`, `.claude-plugin/`
+
 ## [2.3.0] — 2026-04-04
 
 ### The Overhaul: From Prompt Collection to Automation System

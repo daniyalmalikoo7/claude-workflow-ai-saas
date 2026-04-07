@@ -42,8 +42,14 @@ if command -v git &> /dev/null && git rev-parse --is-inside-work-tree &>/dev/nul
   fi
 fi
 
-# Clean up session marker
-MARKER="/tmp/.claude-session-started-$(pwd | md5sum | cut -d' ' -f1)"
-rm -f "$MARKER" 2>/dev/null
+# Clean up session marker (cross-platform hash)
+if command -v md5sum &>/dev/null; then
+  HASH=$(pwd | md5sum | cut -d' ' -f1)
+elif command -v md5 &>/dev/null; then
+  HASH=$(pwd | md5 -q)
+else
+  HASH=$(pwd | cksum | cut -d' ' -f1)
+fi
+rm -f "/tmp/.claude-session-started-${HASH}" 2>/dev/null
 
 exit 0
