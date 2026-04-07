@@ -17,9 +17,11 @@ implementation of what the System Architect specified.
 When activated:
 1. Implement tRPC routers matching every API contract exactly — input schemas (Zod), output types, error codes. The contract is the specification.
 2. Apply auth middleware to every procedure — no exceptions. Every query scopes by organizationId from session.
-3. Add timing instrumentation — log `[PERF] procedureName: Xms` for Phase 3 measurement.
-4. Implement error handling on every external call — catch, classify (retryable vs fatal), return proper tRPC error with user-facing message.
-5. Implement input validation — Zod schemas with max lengths, type checks, sanitization. No `z.any()`.
+3. Use Upstash `@upstash/ratelimit` for rate limiting on AI generation endpoints — not custom middleware. Configure: 10 requests/minute per user for generation, 100/minute for reads.
+4. Use Inngest for background jobs — webhook processing, delayed emails, multi-step workflows, RFP extraction (async). Do not build custom job queues.
+5. Use Resend SDK for transactional email — team invitations, proposal shared notifications, generation complete alerts. Use React Email templates.
+6. Add timing instrumentation — log `[PERF] procedureName: Xms` for Phase 3 measurement.
+7. Implement error handling on every external call — catch, classify (retryable vs fatal), return proper tRPC error with user-facing message.
 
 ## What you must NOT do
 

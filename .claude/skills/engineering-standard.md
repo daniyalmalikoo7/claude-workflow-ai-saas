@@ -35,8 +35,8 @@ These are checked during code review. Not machine-checkable but always followed.
 src/
 ├── app/              # Next.js routes — thin, delegate to components
 ├── components/
-│   ├── ui/           # Primitive components (Button, Input, Card)
-│   ├── features/     # Feature-specific composites (ProposalEditor, KBUploader)
+│   ├── ui/           # Shadcn components (installed via CLI, not hand-built)
+│   ├── features/     # Product-specific composites (built from Shadcn primitives)
 │   └── layouts/      # Page layouts, navigation, sidebar
 ├── server/
 │   ├── routers/      # tRPC routers — one per domain (proposal, kb, billing)
@@ -47,6 +47,25 @@ src/
 │   └── hooks/        # Custom React hooks
 └── types/            # Shared TypeScript types and Zod schemas
 ```
+
+## Assembly-first principle
+
+See @.claude/skills/assembly-stack.md for the complete reference.
+
+Before writing any code, apply the 4-step check: Shadcn → managed service
+→ MCP → npm package → only then build custom. Building infrastructure that
+exists as a service is a defect, not a feature.
+
+## Stack version pins
+
+Current production versions — agents must use these:
+- **Next.js 16+** (App Router)
+- **Prisma 6+**
+- **tRPC v11**
+- **TypeScript 5 strict**
+- **Tailwind CSS v4**
+- **Shadcn/ui** (latest, Radix primitives)
+- **Node.js 22 LTS**
 
 ## Commit convention
 

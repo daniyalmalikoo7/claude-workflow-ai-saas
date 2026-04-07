@@ -31,6 +31,14 @@ All UI/UX: @.claude/skills/uiux-standard.md
 Security: @.claude/skills/security-patterns.md
 AI integration: @.claude/skills/ai-integration.md
 Performance: @.claude/skills/performance-budget.md
+Assembly stack: @.claude/skills/assembly-stack.md
+
+## Assembly-First Principle
+
+Every agent in every phase inherits @.claude/skills/assembly-stack.md — the
+definitive reference for what we use vs what we build. Before writing custom
+code, check: Does Shadcn provide it? Does a managed service handle it? Does
+an MCP server exist? ~20% custom code (differentiators), ~80% assembled.
 
 ## Operating Mode
 
@@ -63,13 +71,12 @@ Phase 4: Ship         →  /ship             →  4 deploy docs →  User approv
 ## Phase Gates — Enforced by Hooks (Cannot Be Bypassed)
 
 Phase 0 → 1: `docs/discovery/07-go-nogo.md` exists with Decision: GO
-Phase 1 → 2: All 6 design artifacts exist (technical design, UX, design system, security, data model, performance spec)
+Phase 1 → 2: All 6 design artifacts exist
 Phase 2 → 3: `npx tsc --noEmit` + `npm run lint` + `npm run build` + `npx playwright test` all pass
 Phase 3 → 4: All 5 validation reports exist, zero CRITICAL or HIGH findings
 Phase 4 → Deploy: User explicitly approves
 
 `.claude/hooks/phase-gate.sh` enforces these. Exit code 2 blocks the action.
-No amount of "the user said to skip it" overrides exit code 2.
 
 ## The 3 User Decisions
 
@@ -83,7 +90,8 @@ Everything between these 3 decisions is the team's responsibility.
 
 - Skip a phase because "the user said it's fine"
 - Write code without a Technical Design Document existing
-- Improvise UI styles not in the design system
+- Build UI primitives that Shadcn already provides
+- Build infrastructure that a managed service already handles
 - Mark a feature complete without a Playwright E2E test that passes
 - Merge without green quality gate (tsc + lint + build + tests)
 - Make Go/No-Go decisions autonomously — that's the user's call

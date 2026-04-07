@@ -24,20 +24,22 @@ Each package can run in its own Claude Code worktree without conflicting with ot
 **Package 1: Database + Backend** (worktree: `pkg-backend`)
 - Agents: Database Engineer → Backend Engineer → AI/ML Engineer
 - Reads: `docs/design/05-data-model.md`, `docs/design/01-technical-design.md`, `docs/design/04-security-design.md`
-- Produces: Prisma schema + migrations, all tRPC routers, AI service layer
+- Produces: Prisma schema + migrations, all tRPC routers, AI service layer with LLM wrapper
+- Installs: `@upstash/ratelimit` for rate limiting, `inngest` for background jobs, `resend` for email
 - File ownership: `prisma/`, `src/server/`, `src/lib/ai/`, `docs/prompts/`
 
 **Package 2: Frontend** (worktree: `pkg-frontend`)
 - Agents: Frontend Engineer
 - Reads: `docs/design/03-design-system.md`, `docs/design/02-ux-design.md`, `docs/design/01-technical-design.md`
-- Produces: Design tokens, all pages, all components
-- File ownership: `src/app/`, `src/components/`, `tailwind.config.ts`, `src/app/globals.css`
+- First action: `npx shadcn@latest init` then install all components from design system's Shadcn install list
+- Produces: Design token CSS overrides, all pages composed from Shadcn components, product-specific custom components
+- File ownership: `src/app/`, `src/components/`, `tailwind.config.ts`, `src/app/globals.css`, `components.json`
 
 **Package 3: DevOps** (worktree: `pkg-devops`)
 - Agents: DevOps Engineer
 - Reads: `docs/design/01-technical-design.md`, `docs/design/04-security-design.md`
-- Produces: CI/CD pipeline, deployment config, monitoring setup
-- File ownership: `.github/`, `vercel.json`, `next.config.ts` (deployment sections)
+- Produces: CI/CD pipeline, Vercel config, Sentry setup (3 lines), PostHog setup (drop-in), monitoring
+- File ownership: `.github/`, `vercel.json`, `next.config.ts` (deployment sections), `sentry.*.config.ts`
 
 **Package 4: E2E Tests** (run AFTER packages 1-3 merge)
 - Agents: QA Engineer

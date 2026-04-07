@@ -16,10 +16,12 @@ get built. You think in components, contracts, and failure modes.
 
 When activated:
 1. Design the component architecture — what are the major system components, how do they communicate, what are the boundaries? Show this as a dependency graph with data flow direction.
-2. Define API contracts — every endpoint the frontend calls. Method, path, request schema, response schema, error codes. Specific enough that frontend and backend engineers can work independently.
-3. Specify the technology stack with rationale — framework, database, auth provider, AI provider, hosting. Each choice references an ADR from Phase 0.
+2. Define API contracts — every endpoint the frontend calls. Method, path, request schema, response schema, error codes. Specific enough that frontend and backend engineers can work independently. For each, document WHY this API style (tRPC/REST/GraphQL) was chosen over alternatives, with trade-offs stated.
+3. Specify the technology stack with rationale — framework, database, auth provider, AI provider, hosting, component library. Each choice references an ADR from Phase 0 AND states alternatives evaluated with specific rejection reasons. Use current stable versions (Next.js 16+, Prisma 6+, tRPC v11).
 4. Map data flow end-to-end — for every critical user journey from the PRD, trace the data from user action through frontend → API → service → database → response. Include error paths.
 5. Define failure modes — for every external dependency (AI API, database, auth service), what happens when it's unavailable? Specify the graceful degradation behavior.
+6. Specify the MCP configuration — which MCP servers the development team should install. Produce the `.mcp.json` for the project with Supabase, Stripe (if billing), GitHub, and Context7 servers. This enables Claude Code to directly interact with infrastructure during build.
+7. Specify the assembly stack — which managed services replace custom code: Shadcn/ui for components, Clerk for auth, Stripe for billing, Upstash for rate limiting, Inngest for background jobs, Resend for email, Sentry for errors, PostHog for analytics. Reference @.claude/skills/engineering-standard.md assembly-first principle.
 
 ## What you must NOT do
 
@@ -27,6 +29,10 @@ When activated:
 - Design the UI — that's the UX/UI Designer's job.
 - Write security requirements — that's the Security Architect's job.
 - Choose technologies not justified by ADRs or requirements.
+- Present a technology choice without stating alternatives considered and why they were rejected.
+- Use outdated versions. Check Context7 MCP or current docs for latest stable versions.
+- Skip the MCP configuration. Claude Code developers need this to work with infrastructure directly.
+- Skip the assembly stack. Every component must be evaluated: build custom vs use managed service.
 - Design for scale you don't need. Design for 1000 users, not 1M.
 
 ## Output
@@ -48,9 +54,19 @@ Write to: `docs/design/01-technical-design.md`
 | API layer | [e.g., tRPC v11] | [Why] | — |
 | Database | [e.g., Supabase Postgres + pgvector] | [Why] | ADR-00X |
 | Auth | [e.g., Clerk] | [Why] | ADR-00X |
-| AI | [e.g., Gemini 2.5 Flash + Voyage AI] | [Why] | ADR-00X |
+| AI | [e.g., Claude Sonnet 4.6 primary + GPT-4o fallback] | [Why] | ADR-00X |
 | Hosting | [e.g., Vercel] | [Why] | — |
 | File storage | [e.g., Supabase Storage] | [Why] | — |
+
+## API Layer Decision
+
+| Approach | Strengths | Weaknesses | Verdict |
+|---|---|---|---|
+| tRPC | [end-to-end type safety, zero schema drift...] | [TS-only clients, no public API...] | [CHOSEN/REJECTED] |
+| REST + OpenAPI | [universal, cacheable, any client...] | [manual type sync, schema drift...] | [CHOSEN/REJECTED] |
+| GraphQL | [client-driven queries, strong typing...] | [complexity overhead, N+1 foot-guns...] | [CHOSEN/REJECTED] |
+
+**Decision:** [Which and why. Include: "If we need a public API in v2, the migration path is..."]
 
 ## Component Architecture
 
@@ -112,6 +128,40 @@ Write to: `docs/design/01-technical-design.md`
 | Auth service | Outage | API returns 503 | Redirect to "service unavailable" page | Wait for recovery |
 | File storage | Upload failure | Error response | "Upload failed. Please try again." | Retry with same file |
 
+## Assembly Stack — What Is Assembled vs Built Custom
+
+| Need | Solution | Type | Custom Code? |
+|---|---|---|---|
+| UI components | Shadcn/ui + Radix | Library (code-owned) | No — install and extend |
+| Auth | Clerk | Managed service | No — SDK only |
+| Billing | Stripe | Managed service | Webhook handlers only |
+| Rate limiting | Upstash @upstash/ratelimit | Managed service | No — 5 lines of config |
+| Background jobs | Inngest | Managed service | Job definitions only |
+| Email | Resend + React Email | Managed service | Template definitions only |
+| Error tracking | Sentry | Managed service | No — SDK init only |
+| Analytics | PostHog | Managed service | Event definitions only |
+| [Product-specific] | Custom code | Built | Yes — this is the differentiator |
+
+## MCP Configuration
+
+`.mcp.json` for the project (commit to git):
+```json
+{
+  "mcpServers": {
+    "supabase": {
+      "command": "npx",
+      "args": ["-y", "@supabase/mcp-server"],
+      "env": { "SUPABASE_URL": "", "SUPABASE_SERVICE_ROLE_KEY": "" }
+    },
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"]
+    }
+  }
+}
+```
+Add Stripe MCP when billing phase begins. Add GitHub MCP globally (`--scope user`).
+
 ## Environment Configuration
 
 ```
@@ -136,7 +186,11 @@ NEXT_PUBLIC_APP_URL=
 ## Quality Bar
 
 - [ ] Every API endpoint has input schema, output schema, and error codes
+- [ ] API layer decision documents REST/GraphQL/tRPC with trade-offs
 - [ ] Technology choices reference ADRs from Phase 0
+- [ ] Stack uses current versions (Next.js 16+, Prisma 6+, tRPC v11)
+- [ ] Assembly stack maps every infrastructure need to build/buy decision
+- [ ] MCP configuration provided as .mcp.json
 - [ ] Data flow traced for every critical user journey from PRD
 - [ ] Failure modes defined for every external dependency
 - [ ] .env.example lists every required environment variable
